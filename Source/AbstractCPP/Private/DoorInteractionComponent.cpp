@@ -51,25 +51,36 @@ void UDoorInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	FRotator CurrentRoation = GetOwner()->GetActorRotation();
-	if (CurrentRotationTime < TimeToRotate) {
+	if (DoorState == EDoorState::DS_Closed) {
 		if (TriggerBox && GetWorld() && GetWorld()->GetFirstLocalPlayerFromController()) {
 			APawn* PlayerPawn = GetWorld()->GetFirstPlayerController()->GetPawn();
 			if (PlayerPawn && TriggerBox->IsOverlappingActor(PlayerPawn)) {
-				CurrentRotationTime += DeltaTime;
-				//Linear Rotation or Constant time
-				//const float RotationAlpha = FMath::Clamp(CurrentRotationTime / TimeToRotate, 0.f, 1.0f);
 
-				//Curve Rotation or Ease Time 
-				const float TimeRatio = FMath::Clamp(CurrentRotationTime / TimeToRotate, 0.f, 1.0f);
-				const float RotationAlpha = OpenCurve.GetRichCurveConst()->Eval(TimeRatio);
-				const FRotator CurrentRotation = FMath::Lerp(StartRotation, FinalRotation, RotationAlpha);
-				GetOwner()->SetActorRotation(CurrentRotation);
+				DoorState = EDoorState::DS_Opening;
+				CurrentRotationTime = 0.f;
 
-				
+
+
 			}
 		}
 	}
+	else if (DoorState == EDoorState::DS_Opening) {
+		CurrentRotationTime += DeltaTime;
+		//Linear Rotation or Constant time
+		//const float RotationAlpha = FMath::Clamp(CurrentRotationTime / TimeToRotate, 0.f, 1.0f);
 
+		//Curve Rotation or Ease Time 
+		const float TimeRatio = FMath::Clamp(CurrentRotationTime / TimeToRotate, 0.f, 1.0f);
+		const float RotationAlpha = OpenCurve.GetRichCurveConst()->Eval(TimeRatio);
+		const FRotator CurrentRotation = FMath::Lerp(StartRotation, FinalRotation, RotationAlpha);
+		GetOwner()->SetActorRotation(CurrentRotation);
+		if (TimeRatio >= 1.f) {
+			DoorState = EDoorState::DS_Open;
+			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, TEXT("DoorOpened"));
+			OpenedEvent.Broadcast();
+		}
+			
+	}
 	DebugDraw();
 }
 
