@@ -4,7 +4,6 @@
 #include "DoorInteractionComponent.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/PlayerController.h"
-#include "ObjectiveWorldSubsystem.generated.h"
 #include "Engine/TriggerBox.h"
 #include "Engine/World.h"
 
