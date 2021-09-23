@@ -4,6 +4,7 @@
 #include "DoorInteractionComponent.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/PlayerController.h"
+#include "ObjectiveWorldSubsystem.generated.h"
 #include "Engine/TriggerBox.h"
 #include "Engine/World.h"
 
@@ -41,7 +42,11 @@ void UDoorInteractionComponent::BeginPlay()
 	FinalRotation = GetOwner()->GetActorRotation() + DesiredRotation;
 	//ensure TimeToRoate is greater than EPSILON
 	CurrentRotationTime = 0.f;
-	// ...
+	
+	UObjectiveWorldSubsystem* ObjectiveWorldSubsystem = GetWorld()->GetSubsystem<UObjectiveWorldSubsystem>();
+	if (ObjectiveWorldSubsystem) {
+		OpenedEvent.AddUObject(ObjectiveWorldSubsystem, &UObjectiveWorldSubsystem::OnObjectiveCompleted);
+	}
 	
 }
 

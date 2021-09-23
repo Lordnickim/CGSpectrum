@@ -2,16 +2,14 @@
 
 
 #include "AbstractCPPGameModeBase.h"
-#include "Kismet/GameplayStatics.h"
+#include "ObjectiveWorldSubsystem.h"
 
 void AAbstractCPPGameModeBase::StartPlay() {
 	Super::StartPlay();
-	if (ObjectiveWidget == nullptr) {
-		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-		ObjectiveWidget = CreateWidget<UUserWidget>(PlayerController, ObjectiveWidgetClass);
-	}
-	if (ObjectiveWidget) {
-		ObjectiveWidget->AddToViewport();
+	UObjectiveWorldSubsystem* ObjectiveWorldSubsystem = GetWorld()->GetSubsystem<UObjectiveWorldSubsystem>();
+	if (ObjectiveWorldSubsystem) {
+		ObjectiveWorldSubsystem->CreateObjectiveWidget(ObjectiveWidgetClass);
+		ObjectiveWorldSubsystem->DisplayObjectiveWidget();
 	}
 }
 
