@@ -37,6 +37,7 @@ public:
 	FOpened OpenedEvent;
 
 	static void OnDebugToggled(IConsoleVariable* Var);
+	void OnDoorOpen();
 	void DebugDraw();
 protected:
 	// Called when the game starts

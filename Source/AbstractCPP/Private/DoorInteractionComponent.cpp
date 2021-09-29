@@ -6,8 +6,9 @@
 #include "GameFramework/PlayerController.h"
 #include "Engine/TriggerBox.h"
 #include "Engine/World.h"
-
+#include "Engine/Engine.h"
 #include "DrawDebugHelpers.h"
+#include "ObjectiveComponent.h"
 
 constexpr float FLT_METERS(float meters) { return meters * 100.f; }
 
@@ -42,10 +43,6 @@ void UDoorInteractionComponent::BeginPlay()
 	//ensure TimeToRoate is greater than EPSILON
 	CurrentRotationTime = 0.f;
 	
-	UObjectiveWorldSubsystem* ObjectiveWorldSubsystem = GetWorld()->GetSubsystem<UObjectiveWorldSubsystem>();
-	if (ObjectiveWorldSubsystem) {
-		OpenedEvent.AddUObject(ObjectiveWorldSubsystem, &UObjectiveWorldSubsystem::OnObjectiveCompleted);
-	}
 	
 }
 
@@ -79,13 +76,20 @@ void UDoorInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 		const FRotator CurrentRotation = FMath::Lerp(StartRotation, FinalRotation, RotationAlpha);
 		GetOwner()->SetActorRotation(CurrentRotation);
 		if (TimeRatio >= 1.f) {
-			DoorState = EDoorState::DS_Open;
-			GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, TEXT("DoorOpened"));
-			OpenedEvent.Broadcast();
+			OnDoorOpen();
 		}
 			
 	}
 	DebugDraw();
+}
+
+void UDoorInteractionComponent::OnDoorOpen() {
+	DoorState = EDoorState::DS_Open;
+	UObjectiveComponent* ObjectiveComponent = GetOwner()->FindComponentByClass<UObjectiveComponent>();
+	if (ObjectiveComponent) {
+		ObjectiveComponent->SetState(EObjectiveState::OS_Completed);
+	}
+	GEngine->AddOnScreenDebugMessage(-1, 3.f, FColor::Yellow, TEXT("DoorOpenedd"));
 }
 
 void UDoorInteractionComponent::OnDebugToggled(IConsoleVariable* Var) {
